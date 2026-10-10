@@ -1,0 +1,258 @@
+<Window x:Class="AntiPrism.Tray.UI.RealControlPanelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Anti-PRISM Security Control Center"
+        Width="880" Height="620"
+        WindowStartupLocation="CenterScreen"
+        Background="#181818"
+        Foreground="#EDEDED"
+        FontFamily="Segoe UI Variable, Segoe UI">
+
+    <Window.Resources>
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#AAAAAA" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder" Background="{TemplateBinding Background}" BorderThickness="0,0,0,2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#0078D4" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#2D2D2D" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#404040" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,6" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#252525" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#3D3D3D" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="6,4" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,12" BorderThickness="0,0,0,1" BorderBrush="#2D2D2D">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🛡️ Anti-PRISM" FontSize="20" FontWeight="SemiBold" Foreground="#0078D4" Margin="0,0,12,0"/>
+                    <TextBlock Text="Hardware Privacy &amp; Process Hunter" FontSize="14" Foreground="#888888" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#107C41" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="StatusText" Text="Service Active" FontSize="13" Foreground="#AAAAAA" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Tab Content -->
+        <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+            <!-- TAB 1: Cameras -->
+            <TabItem Header="Camera Protection">
+                <Grid Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="Active Protection Mode:" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <RadioButton x:Name="RadioOccupy" Content="Exclusive Occupy (M1)" Foreground="#FFFFFF" Margin="0,0,16,0" VerticalAlignment="Center" IsChecked="True"/>
+                        <RadioButton x:Name="RadioDisable" Content="Hardware Driver Disable (M2)" Foreground="#FFFFFF" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                        <RadioButton x:Name="RadioNone" Content="Unprotected (Normal)" Foreground="#888888" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Camera List -->
+                    <DataGrid x:Name="CameraGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False"
+                              Background="#202020" Foreground="#FFFFFF" RowBackground="#252525" AlternatingRowBackground="#202020"
+                              BorderBrush="#303030" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Device Name" Binding="{Binding FriendlyName}" Width="250" />
+                            <DataGridTextColumn Header="Instance / Symbolic Path" Binding="{Binding Id}" Width="*" />
+                            <DataGridCheckBoxColumn Header="Occupied" Binding="{Binding IsOccupied}" Width="80" />
+                            <DataGridCheckBoxColumn Header="Disabled" Binding="{Binding IsDisabled}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                        <Button x:Name="BtnRefreshCameras" Content="Refresh Devices" Margin="0,0,8,0" Click="BtnRefreshCameras_Click"/>
+                        <Button x:Name="BtnApplyCameraMode" Content="Apply Protection Mode" Background="#0078D4" BorderBrush="#0078D4" Click="BtnApplyCameraMode_Click"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- TAB 2: Process Hunter -->
+            <TabItem Header="Process Hunter">
+                <Grid Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Filter bar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="TxtProcessSearch" Grid.Column="0" Margin="0,0,8,0" TextChanged="TxtProcessSearch_TextChanged"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="BtnRefreshProcesses" Content="Refresh" Margin="0,0,8,0" Click="BtnRefreshProcesses_Click"/>
+                            <Button x:Name="BtnAddSelectedToBlacklist" Content="Add to Blacklist" Click="BtnAddSelectedToBlacklist_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Running Processes DataGrid -->
+                    <DataGrid x:Name="ProcessGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False"
+                              Background="#202020" Foreground="#FFFFFF" RowBackground="#252525" AlternatingRowBackground="#202020"
+                              BorderBrush="#303030" HeadersVisibility="Column" SelectionMode="Extended">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Id}" Width="70" />
+                            <DataGridTextColumn Header="Process Name" Binding="{Binding ProcessName}" Width="160" />
+                            <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="160" />
+                            <DataGridTextColumn Header="Executable Path" Binding="{Binding ExecutablePath}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Blacklist Title & Manual Add -->
+                    <Grid Grid.Row="2" Margin="0,12,0,8">
+                        <TextBlock Text="Target Blacklist (Terminated within &lt;500ms):" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button x:Name="BtnAddManualExe" Content="Add Executable Path..." HorizontalAlignment="Right" Click="BtnAddManualExe_Click"/>
+                    </Grid>
+
+                    <!-- Blacklist Grid -->
+                    <DataGrid x:Name="BlacklistGrid" Grid.Row="3" AutoGenerateColumns="False" CanUserAddRows="False"
+                              Background="#202020" Foreground="#FFFFFF" RowBackground="#252525" AlternatingRowBackground="#202020"
+                              BorderBrush="#303030" HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Executable" Binding="{Binding FileName}" Width="180" />
+                            <DataGridTextColumn Header="Full Path" Binding="{Binding ExePath}" Width="*" />
+                            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="80" />
+                            <DataGridTemplateColumn Header="Action" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Remove" Click="BtnRemoveBlacklist_Click" Background="#502020" BorderBrush="#703030" Padding="6,2"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- TAB 3: Stealth & Gesture -->
+            <TabItem Header="Stealth &amp; Gesture">
+                <StackPanel Margin="0,16,0,0">
+                    <TextBlock Text="Disguise &amp; Secret Gesture Parameters" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Secret Trigger Value (0-100):" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtSecretValue" Grid.Column="1" Text="61"/>
+                        <TextBlock Grid.Column="2" Text="Slider position required for trigger" Foreground="#888888" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Secret Hit Count (Hits):" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtSecretCount" Grid.Column="1" Text="6"/>
+                        <TextBlock Grid.Column="2" Text="Number of times slider must cross the target value" Foreground="#888888" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Window Duration (Seconds):" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtSecretWindow" Grid.Column="1" Text="10"/>
+                        <TextBlock Grid.Column="2" Text="Sliding time window for hit accumulation" Foreground="#888888" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </Grid>
+
+                    <CheckBox x:Name="ChkEnableHotkey" Content="Enable Failsafe Hotkey (Ctrl + Alt + Shift + F12)" Foreground="#FFFFFF" Margin="0,8,0,12" IsChecked="True"/>
+                    <CheckBox x:Name="ChkDisguiseNotifications" Content="Disguise Process Kill Notifications as Driver Calibration" Foreground="#FFFFFF" Margin="0,0,0,24" IsChecked="True"/>
+
+                    <Button x:Name="BtnSaveStealthSettings" Content="Save Stealth Settings" HorizontalAlignment="Left" Background="#0078D4" BorderBrush="#0078D4" Click="BtnSaveStealthSettings_Click"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- TAB 4: Logs & Diagnostics -->
+            <TabItem Header="Diagnostics &amp; Rescue">
+                <Grid Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#281A1A" BorderBrush="#502020" BorderThickness="1" CornerRadius="6" Padding="16" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="🚨 Emergency Hardware Unbrick" FontWeight="SemiBold" FontSize="14" Foreground="#FF6B6B"/>
+                                <TextBlock Text="If cameras remain disabled or inaccessible after testing, click here to force-enable all devices." Foreground="#CCCCCC" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Button x:Name="BtnEmergencyUnbrick" Grid.Column="1" Content="ENABLE ALL CAMERAS" Background="#A80000" BorderBrush="#D83B01" FontWeight="Bold" Padding="16,8" Click="BtnEmergencyUnbrick_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <TextBox x:Name="TxtDiagnosticsLog" Grid.Row="1" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                             Background="#141414" Foreground="#B0B0B0" FontFamily="Consolas" FontSize="12" Padding="8"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                        <Button x:Name="BtnRefreshLog" Content="Refresh Diagnostics" Click="BtnRefreshLog_Click"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Margin="0,12,0,0" Padding="0,8,0,0" BorderThickness="0,1,0,0" BorderBrush="#2D2D2D">
+            <TextBlock Text="Anti-PRISM v1.0 • Windows 10/11 Architecture • Dual-Process Stealth Engine" Foreground="#666666" FontSize="11" HorizontalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Window>

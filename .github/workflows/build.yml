@@ -1,0 +1,101 @@
+name: Build and Package Anti-PRISM
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore Anti-PRISM.sln
+
+    - name: Build Solution
+      run: dotnet build Anti-PRISM.sln --configuration Release --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test Anti-PRISM.sln --configuration Release --no-build --verbosity normal
+
+    - name: Publish AntiPrism.Svc
+      run: >
+        dotnet publish src/AntiPrism.Svc/AntiPrism.Svc.csproj
+        --configuration Release
+        --runtime win-x64
+        --self-contained true
+        -p:PublishSingleFile=true
+        -p:IncludeNativeLibrariesForSelfExtract=true
+        --output dist/publish
+
+    - name: Publish AntiPrism.Tray (BrightnessCtl)
+      run: >
+        dotnet publish src/AntiPrism.Tray/AntiPrism.Tray.csproj
+        --configuration Release
+        --runtime win-x64
+        --self-contained true
+        -p:PublishSingleFile=true
+        -p:IncludeNativeLibrariesForSelfExtract=true
+        --output dist/publish
+
+    - name: Setup Inno Setup
+      run: choco install innosetup --no-progress
+
+    - name: Compile Inno Setup Installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/install.iss
+
+    - name: Upload Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AntiPrism-Installer
+        path: dist/installer/*.exe
+
+    - name: Upload Standalone Binaries Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AntiPrism-Binaries
+        path: dist/publish/
+
+    - name: Create or Update GitHub Release
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.0
+        name: "Anti-PRISM v1.0.0 Release"
+        draft: false
+        prerelease: false
+        make_latest: true
+        body: |
+          ### Anti-PRISM Automated Release
+          
+          Dual-process stealth camera defense & process hunter for Windows 10/11.
+          
+          #### One-Click Install in Windows PowerShell (Administrator):
+          ```powershell
+          irm https://raw.githubusercontent.com/peterfu0615/Anti-PRISM/main/scripts/install.ps1 | iex
+          ```
+          
+          #### One-Click Install in Windows CMD:
+          ```cmd
+          powershell -ExecutionPolicy Bypass -NoProfile -Command "irm https://raw.githubusercontent.com/peterfu0615/Anti-PRISM/main/scripts/install.ps1 | iex"
+          ```
+        files: |
+          dist/installer/AntiPrism_Setup.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

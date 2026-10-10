@@ -1,0 +1,18 @@
+## Visual Studio / .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+dist/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+## Testing
+TestResults/
+
+## OS
+.DS_Store
+Thumbs.db
